@@ -1,308 +1,151 @@
-#include <bits/stdc++.h>
-using namespace std;
-
-void solveA(bool fullOutput) {
-
-    int n_codewords;
-    cin >> n_codewords;
-
-    vector<string> codes(n_codewords);
-    set<string> code_set;
-
-    int len = 0;
-
-    for (int i = 0; i < n_codewords; ++i) {
-        cin >> codes[i];
-        code_set.insert(codes[i]);
-        len = codes[i].length();
-    }
-
-    if (fullOutput) {
-        cout << "--- Loi giai chi tiet phan (a) ---\n";
-        cout << "1. Kiem tra tu ma toan 0...\n";
-    }
-
-    string zero_code(len, '0');
-
-    if (code_set.find(zero_code) == code_set.end()) {
-
-        if (fullOutput) {
-            cout << "   -> Khong ton tai tu ma toan 0.\n";
-            cout << "Ket luan: Day KHONG phai ma tuyen tinh.\n";
-        }
-        else {
-            cout << "Not Linear\n";
-        }
-
-        cout << "====\n";
-        return;
-    }
-
-    if (fullOutput) {
-        cout << "   -> Co ton tai tu ma toan 0.\n";
-        cout << "2. Kiem tra tinh dong voi phep XOR...\n";
-    }
-
-    for (int i = 0; i < n_codewords; ++i) {
-
-        for (int j = i + 1; j < n_codewords; ++j) {
-
-            string xor_res = "";
-
-            for (int k = 0; k < len; ++k) {
-
-                xor_res +=
-                    (codes[i][k] == codes[j][k]) ? '0' : '1';
-            }
-
-            if (code_set.find(xor_res) == code_set.end()) {
-
-                if (fullOutput) {
-
-                    cout << "   -> Vi pham: "
-                         << codes[i]
-                         << " XOR "
-                         << codes[j]
-                         << " = "
-                         << xor_res
-                         << " (Khong thuoc tap ma).\n";
-
-                    cout << "Ket luan: Day KHONG phai ma tuyen tinh.\n";
-                }
-                else {
-                    cout << "Not Linear\n";
-                }
-
-                cout << "====\n";
-                return;
-            }
-        }
-    }
-
-    if (fullOutput) {
-        cout << "   -> Moi cap deu thoa man tinh dong.\n";
-        cout << "Ket luan: Day LA ma khoi tuyen tinh.\n";
-    }
-    else {
-        cout << "Linear\n";
-    }
-
-    cout << "====\n";
-}
-
-void solveB(bool fullOutput) {
-
-    int r, c;
-    cin >> r >> c;
-
-    vector<vector<int>> H(r, vector<int>(c));
-
-    for (int i = 0; i < r; ++i) {
-        for (int j = 0; j < c; ++j) {
-            cin >> H[i][j];
-        }
-    }
-
-    if (fullOutput) {
-
-        cout << "--- Loi giai chi tiet phan (b) ---\n";
-
-        cout << "Ma tran kiem tra H ("
-             << r
-             << "x"
-             << c
-             << "):\n";
-
-        for (int i = 0; i < r; ++i) {
-
-            for (int j = 0; j < c; ++j) {
-                cout << H[i][j] << " ";
-            }
-
-            cout << "\n";
-        }
-    }
-
-    vector<vector<int>> mat = H;
-
-    int lead = 0;
-    vector<int> pivot_cols;
-
-    for (int row = 0; row < r; ++row) {
-
-        if (lead >= c)
-            break;
-
-        int i = row;
-
-        while (mat[i][lead] == 0) {
-
-            i++;
-
-            if (i == r) {
-
-                i = row;
-                lead++;
-
-                if (lead == c)
-                    break;
-            }
-        }
-
-        if (lead >= c)
-            break;
-
-        swap(mat[i], mat[row]);
-
-        pivot_cols.push_back(lead);
-
-        for (int i = 0; i < r; ++i) {
-
-            if (i != row && mat[i][lead] == 1) {
-
-                for (int j = 0; j < c; ++j) {
-                    mat[i][j] ^= mat[row][j];
-                }
-            }
-        }
-
-        lead++;
-    }
-
-    vector<int> free_cols;
-    vector<bool> is_pivot(c, false);
-
-    for (int pc : pivot_cols) {
-        is_pivot[pc] = true;
-    }
-
-    for (int j = 0; j < c; ++j) {
-
-        if (!is_pivot[j]) {
-            free_cols.push_back(j);
-        }
-    }
-
-    int k = free_cols.size();
-
-    if (fullOutput) {
-
-        cout << "1. Phan tich khong gian nghiem cua H...\n";
-
-        cout << "   Do dai ma (n): "
-             << c
-             << "\n";
-
-        cout << "   So chieu ma (k): "
-             << k
-             << "\n";
-
-        cout << "2. Sinh tat ca 2^k = "
-             << (1ULL << k)
-             << " tu ma...\n";
-    }
-
-    vector<string> codewords;
-
-    for (unsigned long long mask = 0;
-         mask < (1ULL << k);
-         ++mask) {
-
-        vector<int> c_vec(c, 0);
-
-        for (int i = 0; i < k; ++i) {
-
-            if ((mask >> i) & 1) {
-                c_vec[free_cols[i]] = 1;
-            }
-        }
-
-        for (int row = 0; row < r; ++row) {
-
-            int p_col = -1;
-
-            for (int j = 0; j < c; ++j) {
-
-                if (mat[row][j] == 1) {
-                    p_col = j;
-                    break;
-                }
-            }
-
-            if (p_col != -1 && is_pivot[p_col]) {
-
-                int sum = 0;
-
-                for (int j = p_col + 1; j < c; ++j) {
-
-                    if (mat[row][j] == 1) {
-                        sum ^= c_vec[j];
-                    }
-                }
-
-                c_vec[p_col] = sum;
-            }
-        }
-
-        string s = "";
-
-        for (int j = 0; j < c; ++j) {
-            s += to_string(c_vec[j]);
-        }
-
-        codewords.push_back(s);
-    }
-
-    sort(codewords.begin(), codewords.end());
-
-    if (fullOutput) {
-
-        cout << "3. Tap day du cac tu ma:\n";
-
-        for (const string& cw : codewords) {
-            cout << "   " << cw << "\n";
-        }
-
-        cout << "Ket luan: Da sinh thanh cong "
-             << codewords.size()
-             << " tu ma.\n";
-    }
-    else {
-
-        for (const string& cw : codewords) {
-            cout << cw << "\n";
-        }
-    }
-
-    cout << "====\n";
-}
-
-int main() {
-
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-
-    char task, format;
-
-    while (cin >> task >> format) {
-
-        bool fullOutput =
-            (format == 'F' || format == 'f');
-
-        if (task == 'A' || task == 'a') {
-
-            solveA(fullOutput);
-        }
-        else if (task == 'B' || task == 'b') {
-
-            solveB(fullOutput);
-        }
-        else {
-
-            cout << "Ma yeu cau khong hop le.\n";
-            cout << "====\n";
-        }
-    }
-
-    return 0;
-}
+A B
+4
+000
+011
+101
+110
+
+A F
+4
+000
+011
+101
+110
+
+A b
+4
+000
+011
+101
+110
+
+A f
+4
+000
+011
+101
+110
+
+A B
+4
+000
+001
+010
+100
+
+A F
+4
+000
+001
+010
+100
+
+A b
+4
+000
+001
+010
+100
+
+A f
+4
+000
+001
+010
+100
+
+a B
+8
+000
+001
+010
+011
+100
+101
+110
+111
+
+a F
+8
+000
+001
+010
+011
+100
+101
+110
+111
+
+a b
+8
+000
+001
+010
+011
+100
+101
+110
+111
+
+a f
+8
+000
+001
+010
+011
+100
+101
+110
+111
+
+B B
+2 3
+1 1 0
+0 1 1
+
+B F
+2 3
+1 1 0
+0 1 1
+
+B b
+2 3
+1 1 0
+0 1 1
+
+B f
+2 3
+1 1 0
+0 1 1
+
+b B
+2 4
+1 0 1 1
+0 1 1 0
+
+b F
+2 4
+1 0 1 1
+0 1 1 0
+
+b b
+2 4
+1 0 1 1
+0 1 1 0
+
+b f
+2 4
+1 0 1 1
+0 1 1 0
+
+X B
+4
+000
+111
+101
+010
+
+C F
+2 3
+1 1 0
+0 1 1
