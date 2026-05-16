@@ -1,0 +1,27 @@
+Linear
+============
+--- Loi giai chi tiet phan (a) ---
+1. Kiem tra tu ma toan 0...
+   -> Co ton tai tu ma toan 0.
+2. Kiem tra tinh dong voi phep XOR...
+   -> Vi pham: 011 XOR 101 = 110 (Khong thuoc tap ma).
+Ket luan: Day KHONG phai ma tuyen tinh.
+============
+0000
+0111
+1001
+1110
+============
+--- Loi giai chi tiet phan (b) ---
+Ma tran kiem tra H (2x3):
+1 1 0 
+0 1 1 
+1. Phan tich khong gian nghiem cua H...
+   Do dai ma (n): 3
+   So chieu ma (k): 1
+2. Sinh tat ca 2^k = 2 tu ma...
+3. Tap day du cac tu ma:
+   000
+   111
+Ket luan: Da sinh thanh cong 2 tu ma.
+============
